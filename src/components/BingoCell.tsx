@@ -1,9 +1,8 @@
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
 import TextField from '@material-ui/core/TextField';
 import { useState, useEffect } from 'react';
+import { makeStyles } from '@material-ui/core/styles';
 import { Typography } from '@material-ui/core';
 
 type Props = {
@@ -14,10 +13,22 @@ type Props = {
   column: number;
   onBoxClick: (row: number, column: number, text: string) => void;
   isReadOnly: boolean;
+  dimensions: number;
 };
-const TEXT_ROW = 4;
+
+const useStyles = makeStyles((theme) => ({
+  inputRoot: {
+    color: 'green',
+    '&$disabled': {
+      color: 'black',
+    },
+  },
+  disabled: {},
+}));
 
 const BingoCell = (props: Props) => {
+  const classes = useStyles();
+
   const [text, setText] = useState(props.text);
   const handleUpdateText = (e: React.ChangeEvent<HTMLInputElement>) => {
     setText(e.target.value);
@@ -30,26 +41,61 @@ const BingoCell = (props: Props) => {
     }, 1000);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [text]);
+  }, [props, text]);
 
   return (
     <Grid item>
-      <Card variant='outlined'>
-        <Box height={props.height} width={props.width}>
-          <CardContent>
-            {props.isReadOnly ? (
-              <Typography>{text}</Typography>
-            ) : (
-              <TextField
-                value={text}
-                onChange={handleUpdateText}
-                multiline
-                rows={TEXT_ROW}
-              />
-            )}
-          </CardContent>
+      {props.isReadOnly ? (
+        <Box
+          borderTop={1}
+          borderBottom={props.row === props.dimensions - 1 ? 1 : 0}
+          borderLeft={1}
+          borderRight={props.column === props.dimensions - 1 ? 1 : 0}
+          width={props.width}
+          height={props.width}
+          paddingX='14px'
+          paddingY='18.5px'
+          overflow='clip'
+        >
+          <Typography
+            align='center'
+            style={{
+              wordWrap: 'break-word',
+              height: props.width,
+              width: props.width,
+              alignItems: 'center',
+              justifyContent: 'center',
+              display: 'flex',
+            }}
+          >
+            {text}
+          </Typography>
         </Box>
-      </Card>
+      ) : (
+        <TextField
+          disabled={props.isReadOnly}
+          inputProps={{
+            style: {
+              padding: 0,
+              textAlign: 'center',
+              verticalAlign: 'bottom',
+              height: props.width,
+              width: props.width,
+            },
+          }}
+          fullWidth
+          value={text}
+          onChange={handleUpdateText}
+          multiline
+          variant='outlined'
+          InputProps={{
+            classes: {
+              root: classes.inputRoot,
+              disabled: classes.disabled,
+            },
+          }}
+        />
+      )}
     </Grid>
   );
 };

@@ -1,15 +1,15 @@
 import BingoCell from 'components/BingoCell';
 import { useState, useRef } from 'react';
 import Grid from '@material-ui/core/Grid';
-import { useWindowSize } from '@react-hook/window-size';
+import Box from '@material-ui/core/Box';
+import Button from '@material-ui/core/Button';
 import { exportComponentAsJPEG } from 'react-component-export-image';
 
 type Props = {
   dimensions: number;
 };
 
-const PADDING = 100;
-
+const WIDTH = 150;
 const SAVE = 'Save';
 const FINISH = 'Finish';
 const EDIT = 'Edit';
@@ -19,9 +19,12 @@ const BingoSheet = (props: Props) => {
   const [cells, setCells] = useState(
     new Array(props.dimensions)
       .fill([])
-      .map(() => new Array(props.dimensions).fill(''))
+      .map(() =>
+        new Array(props.dimensions).fill(
+          'Lorem ipsum dolor sit amet, consectetur'
+        )
+      )
   );
-  const [width, height] = useWindowSize();
   const [isReadOnly, setIsReadOnly] = useState(false);
 
   const handleUpdateText = (row: number, column: number, text: string) => {
@@ -46,18 +49,24 @@ const BingoSheet = (props: Props) => {
       <div ref={componentRef}>
         {cells.map((row, rowIndex) => {
           return (
-            <Grid container key={rowIndex}>
+            <Grid
+              container
+              key={rowIndex}
+              alignContent='center'
+              justifyContent='center'
+            >
               {row.map((text, columnIndex) => {
                 return (
                   <BingoCell
-                    text={`${text}_${rowIndex}_${columnIndex}`}
+                    text={`${text}`}
                     key={`${rowIndex}_${columnIndex}`}
-                    width={(width - PADDING) / props.dimensions}
-                    height={(height - PADDING) / props.dimensions}
+                    width={WIDTH}
+                    height={WIDTH}
                     row={rowIndex}
                     column={columnIndex}
                     onBoxClick={handleUpdateText}
                     isReadOnly={isReadOnly}
+                    dimensions={props.dimensions}
                   />
                 );
               })}
@@ -65,22 +74,40 @@ const BingoSheet = (props: Props) => {
           );
         })}
       </div>
-      <button
-        onClick={() => {
-          setIsReadOnly((prevState) => !prevState);
-        }}
-      >
-        {isReadOnly ? EDIT : FINISH}
-      </button>
-      {isReadOnly && (
-        <button
-          onClick={() =>
-            exportComponentAsJPEG(componentRef, { fileName: BINGO })
-          }
+      <Box m={2}>
+        <Grid
+          item
+          container
+          alignContent='space-between'
+          justifyContent='center'
+          spacing={3}
         >
-          {SAVE}
-        </button>
-      )}
+          <Grid item>
+            <Button
+              onClick={() => {
+                setIsReadOnly((prevState) => !prevState);
+              }}
+              variant='contained'
+              color={isReadOnly ? 'default' : 'primary'}
+            >
+              {isReadOnly ? EDIT : FINISH}
+            </Button>
+          </Grid>
+          {isReadOnly && (
+            <Grid item>
+              <Button
+                onClick={() =>
+                  exportComponentAsJPEG(componentRef, { fileName: BINGO })
+                }
+                variant='contained'
+                color='primary'
+              >
+                {SAVE}
+              </Button>
+            </Grid>
+          )}
+        </Grid>
+      </Box>
     </>
   );
 };
